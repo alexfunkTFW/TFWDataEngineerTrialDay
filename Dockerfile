@@ -20,10 +20,15 @@ RUN apt-get update \
     sqlite3 \
     unixodbc \
     default-libmysqlclient-dev \
-    wait-for-it \
-&&  pip install --upgrade pip \
+    wait-for-it
+# start new context to speed up rebuilds
+RUN pip install --upgrade pip \
                 setuptools \
-                apache-airflow[mysql,postgres]==2.0.0 \
+                apache-airflow[mysql,postgres]==2.0.0
+# this was needed after a few weeks, see
+# https://stackoverflow.com/questions/66644975/importerror-cannot-import-name-columnentity-from-sqlalchemy-orm-query
+RUN echo "sqlalchemy < 1.4.0" > requirements.txt \
+&& pip install -r requirements.txt \
 &&  rm -rf /root/.cache \
 &&  apt-get remove -qqy --purge \
             build-essential \
